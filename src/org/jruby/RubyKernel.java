@@ -204,12 +204,17 @@ public class RubyKernel {
              * @see org.jruby.runtime.load.IAutoloadMethod#load(Ruby, String)
              */
             public IRubyObject load(Ruby runtime, String name) {
-                boolean required = loadService.require(file());
-                
+                boolean required = loadService.lockAndRequire(file());
+
                 // File to be loaded by autoload has already been or is being loaded.
                 if (!required) return null;
-                
-                return module.fastGetConstant(baseName);
+
+                IRubyObject value = module.autoloadingTableRemove(baseName);
+                if (value != null) {
+                    module.storeConstant(baseName, value);
+                }
+                loadService.removeAutoLoadFor(name);
+                return value;
             }
         });
         return runtime.getNil();
