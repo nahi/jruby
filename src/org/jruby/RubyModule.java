@@ -2924,8 +2924,7 @@ public class RubyModule extends RubyObject {
         while (p != null) {
             if ((value = p.constantTableFastFetch(internedName)) != null) {
                 if (value == UNDEF) {
-                    if (p.resolveUndefConstant(runtime, internedName) == null) break;
-                    continue; // Not that is loaded loop around to resolve it next pass
+                    return p.resolveUndefConstant(runtime, internedName);
                 }
 
                 if (p == objectClass && this != objectClass) {
