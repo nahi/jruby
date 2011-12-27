@@ -247,6 +247,8 @@ public final class Ruby {
         this.beanManager        = BeanManagerFactory.create(this, config.isManagementEnabled());
         this.jitCompiler        = new JITCompiler(this);
         this.parserStats        = new ParserStats(this);
+
+	this.hashSeed = this.random.nextInt();
         
         this.beanManager.register(new Config(this));
         this.beanManager.register(parserStats);
@@ -3103,6 +3105,10 @@ public final class Ruby {
         return random;
     }
 
+    public int getHashSeed() {
+        return hashSeed;
+    }
+
     public ObjectSpace getObjectSpace() {
         return objectSpace;
     }
@@ -3353,6 +3359,8 @@ public final class Ruby {
     private long randomSeed = 0;
     private long randomSeedSequence = 0;
     private Random random = new Random();
+    /** The runtime-local seed for hash randomization */
+    private int hashSeed = 0;
 
     private List<EventHook> eventHooks = new Vector<EventHook>();
     private boolean hasEventHooks;  
