@@ -287,6 +287,7 @@ public final class Ruby {
         this.out                = config.getOutput();
         this.err                = config.getError();
         this.objectSpaceEnabled = config.isObjectSpaceEnabled();
+        this.siphashEnabled     = config.isSiphashEnabled();
         this.profile            = config.getProfile();
         this.currentDirectory   = config.getCurrentDirectory();
         this.kcode              = config.getKCode();
@@ -294,7 +295,8 @@ public final class Ruby {
         this.jitCompiler        = new JITCompiler(this);
         this.parserStats        = new ParserStats(this);
 
-        this.hashSeed = this.random.nextInt();
+	this.hashSeedK0 = this.random.nextLong();
+	this.hashSeedK1 = this.random.nextLong();
         
         this.beanManager.register(new Config(this));
         this.beanManager.register(parserStats);
@@ -3774,6 +3776,11 @@ public final class Ruby {
     public void setObjectSpaceEnabled(boolean objectSpaceEnabled) {
         this.objectSpaceEnabled = objectSpaceEnabled;
     }
+    
+    // You cannot set siphashEnabled property except via RubyInstanceConfig to avoid mixing hash functions.
+    public boolean isSiphashEnabled() {
+        return siphashEnabled;
+    }
 
     public long getStartTime() {
         return startTime;
@@ -4037,8 +4044,12 @@ public final class Ruby {
         return booting;
     }
 
-    public int getHashSeed() {
-        return hashSeed;
+    public long getHashSeedK0() {
+        return hashSeedK0;
+    }
+
+    public long getHashSeedK1() {
+        return hashSeedK1;
     }
     
     public CoverageData getCoverageData() {
@@ -4063,13 +4074,15 @@ public final class Ruby {
     /** The seed object for the seed value of the runtime-local PRNG */
     private RubyInteger randomSeed;
     /** The runtime-local seed for hash randomization */
-    private int hashSeed = 0;
+    private long hashSeedK0;
+    private long hashSeedK1;
 
     private final List<EventHook> eventHooks = new Vector<EventHook>();
     private boolean hasEventHooks;  
     private boolean globalAbortOnExceptionEnabled = false;
     private boolean doNotReverseLookupEnabled = false;
     private volatile boolean objectSpaceEnabled;
+    private boolean siphashEnabled;
     
     private final Set<Script> jittedMethods = Collections.synchronizedSet(new WeakHashSet<Script>());
     

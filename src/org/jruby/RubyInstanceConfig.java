@@ -160,6 +160,8 @@ public class RubyInstanceConfig {
     private Profile profile            = Profile.DEFAULT;
     private boolean objectSpaceEnabled
             = SafePropertyAccessor.getBoolean("jruby.objectspace.enabled", false);
+    private boolean siphashEnabled
+       	    = SafePropertyAccessor.getBoolean("jruby.siphash.enabled", false);
 
     private CompileMode compileMode = CompileMode.JIT;
     private boolean runRubyInProcess   = true;
@@ -920,6 +922,14 @@ public class RubyInstanceConfig {
 
     public boolean isObjectSpaceEnabled() {
         return objectSpaceEnabled;
+    }
+    
+    public void setSiphashEnabled(boolean newSiphashEnabled) {
+        siphashEnabled = newSiphashEnabled;
+    }
+    
+    public boolean isSiphashEnabled() {
+        return siphashEnabled;
     }
 
     public void setEnvironment(Map newEnvironment) {

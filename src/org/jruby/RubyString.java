@@ -95,7 +95,9 @@ import org.jruby.util.ConvertBytes;
 import org.jruby.util.MurmurHash;
 import org.jruby.util.Numeric;
 import org.jruby.util.Pack;
+import org.jruby.util.PerlHash;
 import org.jruby.util.RegexpOptions;
+import org.jruby.util.SipHashInline;
 import org.jruby.util.Sprintf;
 import org.jruby.util.StringSupport;
 import org.jruby.util.TypeConverter;
@@ -1181,11 +1183,15 @@ public class RubyString extends RubyObject implements EncodingCapable {
     }
 
     private int strHashCode(Ruby runtime) {
-        int hash = MurmurHash.hash32(value.getUnsafeBytes(), value.getBegin(), value.getRealSize(), runtime.getHashSeed());
+        long hash = runtime.isSiphashEnabled() ? SipHashInline.hash24(runtime.getHashSeedK0(),
+                runtime.getHashSeedK1(), value.getUnsafeBytes(), value.getBegin(),
+                value.getRealSize()) : PerlHash.hash(runtime.getHashSeedK0(),
+                value.getUnsafeBytes(), value.getBegin(), value.getRealSize());
         if (runtime.is1_9()) {
-            hash ^= (value.getEncoding().isAsciiCompatible() && scanForCodeRange() == CR_7BIT ? 0 : value.getEncoding().getIndex());
+            hash ^= (value.getEncoding().isAsciiCompatible() && scanForCodeRange() == CR_7BIT ? 0
+                    : value.getEncoding().getIndex());
         }
-        return hash;
+        return (int) hash;
     }
 
     @Override
